@@ -1,0 +1,7 @@
+name = "telegram-calendar-bot"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "YOUR_KV_NAMESPACE_ID"

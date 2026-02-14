@@ -1,29 +1,37 @@
 {
-  "name": "whatsapp-calendar-updater",
-  "version": "0.1.0",
+  "name": "telegram-calendar-bot",
+  "version": "1.0.0",
+  "description": "A Telegram bot that creates Google Calendar events from natural language messages and voice notes, powered by AI. Runs on Cloudflare Workers.",
   "private": true,
+  "keywords": [
+    "telegram",
+    "bot",
+    "google-calendar",
+    "ai",
+    "openai",
+    "cloudflare-workers",
+    "voice-to-calendar",
+    "natural-language",
+    "hebrew"
+  ],
+  "author": "Ofer Shapiria",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ofershap/telegram-calendar-bot.git"
+  },
+  "homepage": "https://github.com/ofershap/telegram-calendar-bot#readme",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.95.3",
-    "date-fns": "^4.1.0",
-    "lucide-react": "^0.564.0",
-    "next": "16.1.6",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "hono": "^4"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@cloudflare/workers-types": "^4",
+    "typescript": "^5",
+    "wrangler": "^4"
   }
 }
