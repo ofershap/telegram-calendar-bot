@@ -234,10 +234,28 @@ src/
 ├── index.ts       # נתיבי Hono (webhook, OAuth, status)
 ├── handlers.ts    # טיפול בהודעות ויצירת אירועים
 ├── ai.ts          # OpenAI — פענוח טקסט, תמונות + תמלול
+├── prompts.ts     # System prompts לטקסט ותמונות
 ├── google.ts      # Google Calendar API + ניהול OAuth tokens
 ├── telegram.ts    # Telegram Bot API helpers
 └── types.ts       # TypeScript interfaces
+test/
+├── image-prompt.ts          # בדיקת prompt לתמונות מול OpenAI
+└── fixtures/                # תמונות לבדיקה
 ```
+
+## בדיקות
+
+אפשר לבדוק את ה-prompt לתמונות מקומית מול OpenAI API:
+
+```bash
+export $(cat .dev.vars | xargs)
+npx tsx test/image-prompt.ts      # הרצה בודדת
+npx tsx test/image-prompt.ts 5    # 5 הרצות לבדיקת עקביות
+```
+
+הבדיקה שולחת תמונה אמיתית ל-GPT-4o ומוודאת שהתוצאה (כותרת, תאריך, שעה, מיקום) תואמת את הצפוי.
+
+---
 
 ## עלויות
 
@@ -308,6 +326,16 @@ See the [Hebrew guide above](#hebrew) for detailed step-by-step instructions.
 - **Multi-language** — Hebrew, English, and more
 - **Delete from chat** — Each event has a delete button
 - **Serverless** — Cloudflare Workers free tier, zero cold starts
+
+### Testing
+
+Test the image prompt locally against OpenAI API:
+
+```bash
+export $(cat .dev.vars | xargs)
+npx tsx test/image-prompt.ts      # single run
+npx tsx test/image-prompt.ts 5    # 5 runs for consistency
+```
 
 ### Environment Variables
 

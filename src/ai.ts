@@ -1,4 +1,5 @@
 import type { Env, ParsedEvent } from './types';
+import { TEXT_SYSTEM_PROMPT, IMAGE_SYSTEM_PROMPT } from './prompts';
 
 const DAYS_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
@@ -11,49 +12,6 @@ function getNowIsrael(): { date: string; time: string; dayName: string } {
   return { date, time, dayName };
 }
 
-const SYSTEM_PROMPT = `אתה עוזר לפענח טקסט חופשי לאירוע ביומן.
-
-כללים:
-- אם לא צוין תאריך, השתמש בהיום (שים לב לאזור זמן ישראל)
-- אם לא צוינה שעת סיום, הוסף שעה לשעת ההתחלה
-- אם צוין יום בשבוע (למשל "יום שני"), חשב את התאריך הקרוב ביותר קדימה
-- אם נאמר "בעוד שעה", "בעוד חצי שעה" וכו' - חשב לפי השעה הנוכחית
-- זהה מיקום אם מוזכר
-- החזר JSON בלבד, בלי markdown
-
-פורמט תשובה (JSON בלבד):
-{
-  "title": "שם האירוע",
-  "date": "YYYY-MM-DD",
-  "end_date": "YYYY-MM-DD",
-  "start_time": "HH:MM",
-  "end_time": "HH:MM",
-  "description": "",
-  "location": ""
-}`;
-
-const IMAGE_SYSTEM_PROMPT = `אתה עוזר לפענח תמונות של אירועים (הזמנות, פלאיירים, צילומי מסך) לאירוע ביומן.
-
-כללים:
-- חלץ תאריך, שעה ומיקום מהתמונה
-- ה-title צריך לתאר את האירוע כפי שמופיע בתמונה. אל תשתמש ב-caption כ-title — ה-caption הוא רק הקשר נוסף.
-  - לדוגמה, אם בתמונה כתוב "נועם ועמית חוגגים יום הולדת 6", ה-title צריך להיות: "נועם ועמית חוגגים יום הולדת 6"
-- אם המיקום לא ידוע או כתוב "יעודכן" / "נעדכן בהמשך" וכדומה - השאר את location ריק
-- אם לא צוין תאריך, השתמש בהיום
-- אם לא צוינה שעת סיום, הוסף שעה לשעת ההתחלה
-- החזר JSON בלבד, בלי markdown
-
-פורמט תשובה (JSON בלבד):
-{
-  "title": "שם האירוע מהתמונה",
-  "date": "YYYY-MM-DD",
-  "end_date": "YYYY-MM-DD",
-  "start_time": "HH:MM",
-  "end_time": "HH:MM",
-  "description": "",
-  "location": ""
-}`;
-
 export async function parseEventText(env: Env, text: string): Promise<ParsedEvent> {
   const { date, time, dayName } = getNowIsrael();
 
@@ -63,7 +21,7 @@ export async function parseEventText(env: Env, text: string): Promise<ParsedEven
     body: JSON.stringify({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT + `\n\nהיום: ${date} (יום ${dayName}), השעה עכשיו: ${time}` },
+        { role: 'system', content: TEXT_SYSTEM_PROMPT + `\n\nהיום: ${date} (יום ${dayName}), השעה עכשיו: ${time}` },
         { role: 'user', content: text },
       ],
       temperature: 0.1,
@@ -103,10 +61,10 @@ export async function parseEventImage(env: Env, imageUrl: string, caption?: stri
   const contentType = mimeMap[ext] || 'image/jpeg';
 
   const userContent: any[] = [
-    { type: 'image_url', image_url: { url: `data:${contentType};base64,${base64}` } },
+    { type: 'image_url', image_url: { url: `data:${contentType};base64,${base64}`, detail: 'high' } },
   ];
   if (caption) {
-    userContent.push({ type: 'text', text: `[הקשר: ההודעה הועברה מ: "${caption}"]` });
+    userContent.push({ type: 'text', text: `[context: forwarded from "${caption}"]` });
   }
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -115,7 +73,7 @@ export async function parseEventImage(env: Env, imageUrl: string, caption?: stri
     body: JSON.stringify({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: IMAGE_SYSTEM_PROMPT + `\n\nהיום: ${date} (יום ${dayName}), השעה עכשיו: ${time}` },
+        { role: 'system', content: IMAGE_SYSTEM_PROMPT + `\n\nToday: ${date} (${dayName}), current time: ${time} (Israel timezone)` },
         { role: 'user', content: userContent },
       ],
       temperature: 0.1,
