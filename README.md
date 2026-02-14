@@ -95,13 +95,14 @@
 
 | מודל | שימוש | הערות |
 |---|---|---|
-| **gpt-4o-mini** | פענוח טקסט + חילוץ מתמונות (vision) | נדרש לכל הפעולות |
+| **gpt-4o-mini** | פענוח טקסט חופשי לאירוע | זול ומהיר, מספיק לטקסט |
+| **gpt-4o** | חילוץ פרטים מתמונות (vision) | דיוק גבוה בעברית, ~$0.01-0.03 לתמונה |
 | **whisper-1** | תמלול הודעות קוליות | נדרש רק אם שולחים הודעות קוליות |
 
 3. בדוק ב-[Settings → Limits](https://platform.openai.com/settings/organization/limits) שיש לך גישה למודלים האלה
 4. ודא שיש credit בחשבון — גם $5 מספיקים לחודשים של שימוש אישי
 
-> 💡 **שימו לב:** `gpt-4o-mini` כולל יכולת **vision** (ראייה) — לא צריך להפעיל מודל נפרד לתמונות.
+> 💡 **למה שני מודלים?** `gpt-4o-mini` מספיק לפענוח טקסט, אבל `gpt-4o` הרבה יותר מדויק בקריאת עברית מתמונות (הזמנות, פלאיירים, צילומי מסך).
 
 </details>
 
@@ -216,9 +217,9 @@ curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
 ## ארכיטקטורה
 
 ```
-Telegram  →  Cloudflare Worker  →  OpenAI GPT-4o-mini  →  Google Calendar API
+Telegram  →  Cloudflare Worker  →  OpenAI GPT-4o-mini (טקסט)  →  Google Calendar API
+                                →  OpenAI GPT-4o (תמונות)
                                 →  OpenAI Whisper (תמלול קולי)
-                                →  GPT-4o-mini Vision (חילוץ מתמונות)
 ```
 
 | רכיב | תפקיד |
@@ -226,7 +227,8 @@ Telegram  →  Cloudflare Worker  →  OpenAI GPT-4o-mini  →  Google Calendar 
 | **Hono** | Web framework קליל |
 | **Cloudflare Workers** | Serverless, אפס cold starts |
 | **Cloudflare KV** | שמירת OAuth tokens |
-| **OpenAI GPT-4o-mini** | פענוח טקסט חופשי לאירוע + חילוץ מתמונות |
+| **OpenAI GPT-4o-mini** | פענוח טקסט חופשי לאירוע |
+| **OpenAI GPT-4o** | חילוץ פרטי אירוע מתמונות (vision) |
 | **OpenAI Whisper** | תמלול הודעות קוליות |
 | **Google Calendar API** | יצירה ומחיקה של אירועים |
 
@@ -248,7 +250,8 @@ src/
 |---|---|
 | Cloudflare Workers | חינם (100K בקשות/יום) |
 | Cloudflare KV | חינם (100K קריאות/יום) |
-| OpenAI GPT-4o-mini | ~₪0.003 לאירוע |
+| OpenAI GPT-4o-mini | ~₪0.003 לאירוע (טקסט) |
+| OpenAI GPT-4o | ~₪0.05 לתמונה |
 | OpenAI Whisper | ~₪0.02 לדקת קול |
 | Google Calendar API | חינם |
 
@@ -293,7 +296,7 @@ Send a message like **"Meeting with Dan tomorrow at 3pm"**, a voice note, or a p
 
 1. **Clone** — `git clone https://github.com/ofershap/telegram-calendar-bot.git`
 2. **Create a Telegram bot** — Message [@BotFather](https://t.me/BotFather), get a token
-3. **Set up OpenAI** — Get an API key, ensure `gpt-4o-mini` and `whisper-1` models are available
+3. **Set up OpenAI** — Get an API key, ensure `gpt-4o`, `gpt-4o-mini`, and `whisper-1` models are available
 4. **Set up Google Cloud** — Create project, enable Calendar API, create OAuth credentials
 5. **Deploy to Cloudflare** — `npm install && npx wrangler login && npm run deploy`
 6. **Set secrets** — Use `npx wrangler secret put` for each env var
