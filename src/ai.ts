@@ -75,7 +75,10 @@ export async function parseEventImage(env: Env, imageUrl: string, caption?: stri
   if (!imageRes.ok) throw new Error(`Failed to download image: ${imageRes.status}`);
   const imageBuffer = await imageRes.arrayBuffer();
   const base64 = arrayBufferToBase64(imageBuffer);
-  const contentType = imageRes.headers.get('content-type') || 'image/jpeg';
+
+  const ext = imageUrl.split('.').pop()?.toLowerCase() || '';
+  const mimeMap: Record<string, string> = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp' };
+  const contentType = mimeMap[ext] || 'image/jpeg';
 
   const userContent: any[] = [
     { type: 'image_url', image_url: { url: `data:${contentType};base64,${base64}` } },
