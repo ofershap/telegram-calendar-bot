@@ -80,7 +80,7 @@ export async function parseEventImage(env: Env, imageUrl: string, caption?: stri
     body: JSON.stringify({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT + `\n\nהיום: ${date} (יום ${dayName}), השעה עכשיו: ${time}\n\nהמשתמש שלח תמונה. חלץ ממנה את פרטי האירוע (שם, תאריך, שעה, מיקום). אם יש כיתוב נוסף, השתמש בו כהקשר.` },
+        { role: 'system', content: SYSTEM_PROMPT + `\n\nהיום: ${date} (יום ${dayName}), השעה עכשיו: ${time}\n\nהמשתמש שלח תמונה של אירוע (הזמנה, פלאייר, צילום מסך וכו').\n- חלץ תאריך, שעה ומיקום מהתמונה\n- אם המשתמש צירף כיתוב (caption) — השתמש בו כשם האירוע (title). הכיתוב הוא התיאור שלו לאירוע מנקודת המבט שלו.\n- אם אין כיתוב, בחר שם אירוע מתאים מתוך התמונה.` },
         { role: 'user', content: userContent },
       ],
       temperature: 0.1,
