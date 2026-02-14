@@ -83,27 +83,29 @@ async function handleAddEvent(chatId: number, text: string, env: Env): Promise<v
   try {
     await sendMessage(env, chatId, '🔄 מעבד...');
 
-    const parsed = await parseEventText(env, text);
+    const events = await parseEventText(env, text);
 
-    const endDate = parsed.end_date || parsed.date;
-    const startTime = `${parsed.date}T${parsed.start_time}:00`;
-    const endTime = `${endDate}T${parsed.end_time}:00`;
+    for (const parsed of events) {
+      const endDate = parsed.end_date || parsed.date;
+      const startTime = `${parsed.date}T${parsed.start_time}:00`;
+      const endTime = `${endDate}T${parsed.end_time}:00`;
 
-    const event = await createEvent(env, {
-      title: parsed.title,
-      startTime,
-      endTime,
-      description: parsed.description || undefined,
-      location: parsed.location || undefined,
-    });
+      const event = await createEvent(env, {
+        title: parsed.title,
+        startTime,
+        endTime,
+        description: parsed.description || undefined,
+        location: parsed.location || undefined,
+      });
 
-    const evDay = DAYS_HE[new Date(startTime).getDay()];
-    let msg = `✅ <b>אירוע נוסף ליומן!</b>\n\n📌 <b>${escapeHtml(parsed.title)}</b>\n🗓 יום ${evDay}, ${formatDate(startTime)}\n🕐 ${parsed.start_time} - ${parsed.end_time}`;
-    if (parsed.location) msg += `\n📍 ${escapeHtml(parsed.location)}`;
-    if (parsed.description) msg += `\n📝 ${escapeHtml(parsed.description)}`;
-    if (event.htmlLink) msg += `\n\n🔗 <a href="${event.htmlLink}">פתח ביומן</a>`;
+      const evDay = DAYS_HE[new Date(startTime).getDay()];
+      let msg = `✅ <b>אירוע נוסף ליומן!</b>\n\n📌 <b>${escapeHtml(parsed.title)}</b>\n🗓 יום ${evDay}, ${formatDate(startTime)}\n🕐 ${parsed.start_time} - ${parsed.end_time}`;
+      if (parsed.location) msg += `\n📍 ${escapeHtml(parsed.location)}`;
+      if (parsed.description) msg += `\n📝 ${escapeHtml(parsed.description)}`;
+      if (event.htmlLink) msg += `\n\n🔗 <a href="${event.htmlLink}">פתח ביומן</a>`;
 
-    await sendMessage(env, chatId, msg, [[{ text: '🗑 מחק אירוע', callback_data: `delete:${event.id}` }]]);
+      await sendMessage(env, chatId, msg, [[{ text: '🗑 מחק אירוע', callback_data: `delete:${event.id}` }]]);
+    }
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : 'Unknown error';
     if (errMsg === 'NOT_AUTHENTICATED') {

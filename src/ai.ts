@@ -12,7 +12,21 @@ function getNowIsrael(): { date: string; time: string; dayName: string } {
   return { date, time, dayName };
 }
 
-export async function parseEventText(env: Env, text: string): Promise<ParsedEvent> {
+function parseJsonResponse(content: string): ParsedEvent[] {
+  const arrayMatch = content.match(/\[[\s\S]*\]/);
+  if (arrayMatch) {
+    try {
+      const arr = JSON.parse(arrayMatch[0]);
+      if (Array.isArray(arr) && arr.length > 0) return arr;
+    } catch {}
+  }
+
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Could not parse AI response');
+  return [JSON.parse(jsonMatch[0])];
+}
+
+export async function parseEventText(env: Env, text: string): Promise<ParsedEvent[]> {
   const { date, time, dayName } = getNowIsrael();
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -25,7 +39,7 @@ export async function parseEventText(env: Env, text: string): Promise<ParsedEven
         { role: 'user', content: text },
       ],
       temperature: 0.1,
-      max_tokens: 300,
+      max_tokens: 800,
     }),
   });
 
@@ -33,10 +47,7 @@ export async function parseEventText(env: Env, text: string): Promise<ParsedEven
   const content = data.choices?.[0]?.message?.content;
   if (!content) throw new Error('No AI response');
 
-  const jsonMatch = content.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('Could not parse AI response');
-
-  return JSON.parse(jsonMatch[0]);
+  return parseJsonResponse(content);
 }
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
