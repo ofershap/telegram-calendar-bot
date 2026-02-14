@@ -64,7 +64,7 @@
 | [Cloudflare](https://dash.cloudflare.com/sign-up) | חשבון + Workers | חינם |
 | [Telegram](https://t.me/BotFather) | בוט חדש | חינם |
 | [Google Cloud](https://console.cloud.google.com/) | פרויקט + Calendar API | חינם |
-| [OpenAI](https://platform.openai.com/api-keys) | מפתח API | ~$0.001 לאירוע |
+| [OpenAI](https://platform.openai.com/api-keys) | מפתח API (ראה פירוט למטה) | ~$0.001 לאירוע |
 | Node.js 18+ | מותקן מקומית | — |
 
 ---
@@ -87,7 +87,29 @@
 
 ---
 
-### שלב 2: הגדרת Google Cloud
+### שלב 2: הגדרת OpenAI
+
+<details>
+<summary><b>🤖 לחץ לפתיחת ההוראות</b></summary>
+
+1. גש ל-[OpenAI Platform](https://platform.openai.com/api-keys) וצור מפתח API חדש
+2. **ודא שהמודלים הבאים זמינים בחשבון שלך:**
+
+| מודל | שימוש | הערות |
+|---|---|---|
+| **gpt-4o-mini** | פענוח טקסט + חילוץ מתמונות (vision) | נדרש לכל הפעולות |
+| **whisper-1** | תמלול הודעות קוליות | נדרש רק אם שולחים הודעות קוליות |
+
+3. בדוק ב-[Settings → Limits](https://platform.openai.com/settings/organization/limits) שיש לך גישה למודלים האלה
+4. ודא שיש credit בחשבון — גם $5 מספיקים לחודשים של שימוש אישי
+
+> 💡 **שימו לב:** `gpt-4o-mini` כולל יכולת **vision** (ראייה) — לא צריך להפעיל מודל נפרד לתמונות.
+
+</details>
+
+---
+
+### שלב 3: הגדרת Google Cloud
 
 <details>
 <summary><b>☁️ לחץ לפתיחת ההוראות</b></summary>
@@ -119,7 +141,7 @@
 
 ---
 
-### שלב 3: התקנה ודיפלוי
+### שלב 4: התקנה ודיפלוי
 
 <details>
 <summary><b>🚀 לחץ לפתיחת ההוראות</b></summary>
@@ -170,7 +192,7 @@ echo "https://telegram-calendar-bot.YOUR_SUBDOMAIN.workers.dev" | npx wrangler s
 npm run deploy
 ```
 
-> 🔄 **אחרי הדיפלוי:** חזור ל-[Google Cloud Console](https://console.cloud.google.com/) → Credentials → ה-OAuth Client שלך, ועדכן את ה-**Redirect URI** לכתובת האמיתית שקיבלת מ-Cloudflare:
+> 🔄 **אחרי הדיפלוי:** חזור ל-[Google Cloud Console](https://console.cloud.google.com/) → Credentials → ה-OAuth Client שלך (שלב 3), ועדכן את ה-**Redirect URI** לכתובת האמיתית שקיבלת מ-Cloudflare:
 > ```
 > https://telegram-calendar-bot.YOUR_SUBDOMAIN.workers.dev/oauth/callback
 > ```
@@ -179,7 +201,7 @@ npm run deploy
 
 ---
 
-### שלב 4: חיבור Webhook
+### שלב 5: חיבור Webhook
 
 ```bash
 curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
@@ -187,7 +209,7 @@ curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
   -d '{"url": "https://telegram-calendar-bot.YOUR_SUBDOMAIN.workers.dev/webhook"}'
 ```
 
-### שלב 5: חיבור Google Calendar
+### שלב 6: חיבור Google Calendar
 
 שלח הודעה כלשהי לבוט — הוא ישלח לך לינק לחיבור חשבון Google. לחץ, אשר, וסיימת.
 
@@ -273,11 +295,12 @@ Send a message like **"Meeting with Dan tomorrow at 3pm"**, a voice note, or a p
 
 1. **Clone** — `git clone https://github.com/ofershap/telegram-calendar-bot.git`
 2. **Create a Telegram bot** — Message [@BotFather](https://t.me/BotFather), get a token
-3. **Set up Google Cloud** — Create project, enable Calendar API, create OAuth credentials
-4. **Deploy to Cloudflare** — `npm install && npx wrangler login && npm run deploy`
-5. **Set secrets** — Use `npx wrangler secret put` for each env var
-6. **Register webhook** — `curl` to Telegram's `setWebhook` endpoint
-7. **Connect Google** — Send a message to the bot, click the auth link
+3. **Set up OpenAI** — Get an API key, ensure `gpt-4o-mini` and `whisper-1` models are available
+4. **Set up Google Cloud** — Create project, enable Calendar API, create OAuth credentials
+5. **Deploy to Cloudflare** — `npm install && npx wrangler login && npm run deploy`
+6. **Set secrets** — Use `npx wrangler secret put` for each env var
+7. **Register webhook** — `curl` to Telegram's `setWebhook` endpoint
+8. **Connect Google** — Send a message to the bot, click the auth link
 
 See the [Hebrew guide above](#hebrew) for detailed step-by-step instructions.
 
