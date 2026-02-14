@@ -29,7 +29,7 @@ const TEST_CASES: TestCase[] = [
   {
     name: 'Birthday invitation - נועם ועמית',
     imagePath: path.join(__dirname, 'fixtures/birthday-invitation.png'),
-    caption: 'גאיה גן מורן',
+    caption: 'הזמנה ליום הולדת',
     expectedTitle: 'נועם ועמית חוגגים יום הולדת 6',
     expectedDate: '2026-03-22',
     expectedTime: '17:00',

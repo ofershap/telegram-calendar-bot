@@ -43,13 +43,13 @@ const TEST_CASES: TextTestCase[] = [
   },
   {
     name: 'Multiple events in one message',
-    input: `שימו 🩷- ביום שישי הקרוב 13/2 נצא לפעילות בגן נופר, ביום ראשון 15/2 נצא לפעילות במוזיאון הראשונים באבן יהודה וביום שני 16/2 נצא לצעדה בית ספרית- יוצרים קהילה שווה.
-הוסף ליומן ובכל אירוע תרשום בכותרת ״ארבל (צאלון):״ לפני השם של האירוע`,
+    input: `ביום שלישי 18/2 יש הרצאה בספריה העירונית בשעה 10:00, ביום רביעי 19/2 יש סדנת יצירה במתנ"ס בשעה 16:00 וביום חמישי 20/2 יש טיול שנתי.
+הוסף ליומן ובכל אירוע תרשום בכותרת ״כיתה ג׳:״ לפני השם של האירוע`,
     expectMultiple: true,
     expected: [
-      { titleContains: 'גן נופר' },
-      { titleContains: 'מוזיאון' },
-      { titleContains: 'צעדה' },
+      { titleContains: 'הרצאה' },
+      { titleContains: 'סדנ' },
+      { titleContains: 'טיול' },
     ],
   },
 ];
