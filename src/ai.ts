@@ -21,6 +21,14 @@ function parseJsonResponse(content: string): ParsedEvent[] {
     } catch {}
   }
 
+  const objects: ParsedEvent[] = [];
+  const regex = /\{[^{}]*\}/g;
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    try { objects.push(JSON.parse(match[0])); } catch {}
+  }
+  if (objects.length > 0) return objects;
+
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('Could not parse AI response');
   return [JSON.parse(jsonMatch[0])];
