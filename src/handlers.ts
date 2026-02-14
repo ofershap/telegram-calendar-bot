@@ -149,16 +149,21 @@ async function handlePhoto(chatId: number, fileId: string, caption: string | und
     const startTime = `${parsed.date}T${parsed.start_time}:00`;
     const endTime = `${endDate}T${parsed.end_time}:00`;
 
+    let description = parsed.description || '';
+    if (description) description += '\n\n';
+    description += `📸 נוצר מתמונה`;
+
     const event = await createEvent(env, {
       title: parsed.title,
       startTime,
       endTime,
-      description: parsed.description || undefined,
+      description,
       location: parsed.location || undefined,
+      imageUrl: fileUrl,
     });
 
     const evDay = DAYS_HE[new Date(startTime).getDay()];
-    let msg = `✅ <b>אירוע נוסף ליומן!</b>\n\n📌 <b>${escapeHtml(parsed.title)}</b>\n🗓 יום ${evDay}, ${formatDate(startTime)}\n🕐 ${parsed.start_time} - ${parsed.end_time}`;
+    let msg = `✅ <b>אירוע נוסף ליומן!</b>\n\n📌 <b>${escapeHtml(parsed.title)}</b> 📸\n🗓 יום ${evDay}, ${formatDate(startTime)}\n🕐 ${parsed.start_time} - ${parsed.end_time}`;
     if (parsed.location) msg += `\n📍 ${escapeHtml(parsed.location)}`;
     if (parsed.description) msg += `\n📝 ${escapeHtml(parsed.description)}`;
     if (event.htmlLink) msg += `\n\n🔗 <a href="${event.htmlLink}">פתח ביומן</a>`;

@@ -89,18 +89,29 @@ async function calendarFetch(env: Env, path: string, options: RequestInit = {}):
 
 export async function createEvent(
   env: Env,
-  event: { title: string; startTime: string; endTime: string; description?: string; location?: string }
+  event: { title: string; startTime: string; endTime: string; description?: string; location?: string; imageUrl?: string }
 ): Promise<GoogleCalendarEvent> {
   const calendarId = env.GOOGLE_CALENDAR_ID || 'primary';
+
+  const body: Record<string, unknown> = {
+    summary: event.title,
+    start: { dateTime: event.startTime, timeZone: 'Asia/Jerusalem' },
+    end: { dateTime: event.endTime, timeZone: 'Asia/Jerusalem' },
+  };
+  if (event.description) body.description = event.description;
+  if (event.location) body.location = event.location;
+
+  if (event.imageUrl) {
+    body.attachments = [{ fileUrl: event.imageUrl, title: 'תמונת האירוע', mimeType: 'image/jpeg' }];
+    return calendarFetch(env, `/calendars/${encodeURIComponent(calendarId)}/events?supportsAttachments=true`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
   return calendarFetch(env, `/calendars/${encodeURIComponent(calendarId)}/events`, {
     method: 'POST',
-    body: JSON.stringify({
-      summary: event.title,
-      start: { dateTime: event.startTime, timeZone: 'Asia/Jerusalem' },
-      end: { dateTime: event.endTime, timeZone: 'Asia/Jerusalem' },
-      description: event.description || undefined,
-      location: event.location || undefined,
-    }),
+    body: JSON.stringify(body),
   });
 }
 

@@ -32,6 +32,32 @@ const SYSTEM_PROMPT = `אתה עוזר לפענח טקסט חופשי לאירו
   "location": ""
 }`;
 
+const IMAGE_SYSTEM_PROMPT = `אתה עוזר לפענח תמונות של אירועים (הזמנות, פלאיירים, צילומי מסך) לאירוע ביומן.
+
+כללים:
+- חלץ תאריך, שעה ומיקום מהתמונה
+- ה-title צריך להיות בפורמט: "מקור: תיאור האירוע"
+  - אם ההודעה הועברה מקבוצה/איש קשר (מופיע ב-caption או בתמונה), השתמש בשם המקור כקידומת
+  - לדוגמה: "גאיה גן מורן: נועם ועמית חוגגים יומולדת 6"
+  - אם אין מקור ברור, פשוט כתוב את שם האירוע כפי שמופיע בתמונה
+- אם יש caption מהמשתמש, השתמש בו כמקור/הקשר לאירוע (זה בדרך כלל שם הקבוצה או האדם שהעביר את ההודעה)
+- אם המיקום לא ידוע או כתוב "יעודכן" / "נעדכן בהמשך" - השאר את location ריק
+- שים פרטים נוספים מהתמונה ב-description (למשל: שם החוגג, גיל, הערות)
+- אם לא צוין תאריך, השתמש בהיום
+- אם לא צוינה שעת סיום, הוסף שעה לשעת ההתחלה
+- החזר JSON בלבד, בלי markdown
+
+פורמט תשובה (JSON בלבד):
+{
+  "title": "שם האירוע",
+  "date": "YYYY-MM-DD",
+  "end_date": "YYYY-MM-DD",
+  "start_time": "HH:MM",
+  "end_time": "HH:MM",
+  "description": "",
+  "location": ""
+}`;
+
 export async function parseEventText(env: Env, text: string): Promise<ParsedEvent> {
   const { date, time, dayName } = getNowIsrael();
 
@@ -39,7 +65,7 @@ export async function parseEventText(env: Env, text: string): Promise<ParsedEven
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.OPENAI_API_KEY}` },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT + `\n\nהיום: ${date} (יום ${dayName}), השעה עכשיו: ${time}` },
         { role: 'user', content: text },
@@ -93,7 +119,7 @@ export async function parseEventImage(env: Env, imageUrl: string, caption?: stri
     body: JSON.stringify({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT + `\n\nהיום: ${date} (יום ${dayName}), השעה עכשיו: ${time}\n\nהמשתמש שלח תמונה של אירוע (הזמנה, פלאייר, צילום מסך וכו').\n- חלץ תאריך, שעה ומיקום מהתמונה\n- אם המשתמש צירף כיתוב (caption) — השתמש בו כשם האירוע (title). הכיתוב הוא התיאור שלו לאירוע מנקודת המבט שלו.\n- אם אין כיתוב, בחר שם אירוע מתאים מתוך התמונה.` },
+        { role: 'system', content: IMAGE_SYSTEM_PROMPT + `\n\nהיום: ${date} (יום ${dayName}), השעה עכשיו: ${time}` },
         { role: 'user', content: userContent },
       ],
       temperature: 0.1,

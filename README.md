@@ -95,14 +95,11 @@
 
 | מודל | שימוש | הערות |
 |---|---|---|
-| **gpt-4o-mini** | פענוח טקסט חופשי לאירוע | זול ומהיר, מספיק לטקסט |
-| **gpt-4o** | חילוץ פרטים מתמונות (vision) | דיוק גבוה בעברית, ~$0.01-0.03 לתמונה |
+| **gpt-4o** | פענוח טקסט, תמונות ו-vision | מודל אחד לכל המשימות |
 | **whisper-1** | תמלול הודעות קוליות | נדרש רק אם שולחים הודעות קוליות |
 
 3. בדוק ב-[Settings → Limits](https://platform.openai.com/settings/organization/limits) שיש לך גישה למודלים האלה
 4. ודא שיש credit בחשבון — גם $5 מספיקים לחודשים של שימוש אישי
-
-> 💡 **למה שני מודלים?** `gpt-4o-mini` מספיק לפענוח טקסט, אבל `gpt-4o` הרבה יותר מדויק בקריאת עברית מתמונות (הזמנות, פלאיירים, צילומי מסך).
 
 </details>
 
@@ -217,8 +214,7 @@ curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
 ## ארכיטקטורה
 
 ```
-Telegram  →  Cloudflare Worker  →  OpenAI GPT-4o-mini (טקסט)  →  Google Calendar API
-                                →  OpenAI GPT-4o (תמונות)
+Telegram  →  Cloudflare Worker  →  OpenAI GPT-4o (טקסט + תמונות)  →  Google Calendar API
                                 →  OpenAI Whisper (תמלול קולי)
 ```
 
@@ -227,8 +223,7 @@ Telegram  →  Cloudflare Worker  →  OpenAI GPT-4o-mini (טקסט)  →  Googl
 | **Hono** | Web framework קליל |
 | **Cloudflare Workers** | Serverless, אפס cold starts |
 | **Cloudflare KV** | שמירת OAuth tokens |
-| **OpenAI GPT-4o-mini** | פענוח טקסט חופשי לאירוע |
-| **OpenAI GPT-4o** | חילוץ פרטי אירוע מתמונות (vision) |
+| **OpenAI GPT-4o** | פענוח טקסט, חילוץ פרטים מתמונות (vision) |
 | **OpenAI Whisper** | תמלול הודעות קוליות |
 | **Google Calendar API** | יצירה ומחיקה של אירועים |
 
@@ -238,7 +233,7 @@ Telegram  →  Cloudflare Worker  →  OpenAI GPT-4o-mini (טקסט)  →  Googl
 src/
 ├── index.ts       # נתיבי Hono (webhook, OAuth, status)
 ├── handlers.ts    # טיפול בהודעות ויצירת אירועים
-├── ai.ts          # OpenAI — פענוח טקסט + תמלול
+├── ai.ts          # OpenAI — פענוח טקסט, תמונות + תמלול
 ├── google.ts      # Google Calendar API + ניהול OAuth tokens
 ├── telegram.ts    # Telegram Bot API helpers
 └── types.ts       # TypeScript interfaces
@@ -250,8 +245,7 @@ src/
 |---|---|
 | Cloudflare Workers | חינם (100K בקשות/יום) |
 | Cloudflare KV | חינם (100K קריאות/יום) |
-| OpenAI GPT-4o-mini | ~₪0.003 לאירוע (טקסט) |
-| OpenAI GPT-4o | ~₪0.05 לתמונה |
+| OpenAI GPT-4o | ~₪0.01 לאירוע (טקסט), ~₪0.05 לתמונה |
 | OpenAI Whisper | ~₪0.02 לדקת קול |
 | Google Calendar API | חינם |
 
@@ -296,7 +290,7 @@ Send a message like **"Meeting with Dan tomorrow at 3pm"**, a voice note, or a p
 
 1. **Clone** — `git clone https://github.com/ofershap/telegram-calendar-bot.git`
 2. **Create a Telegram bot** — Message [@BotFather](https://t.me/BotFather), get a token
-3. **Set up OpenAI** — Get an API key, ensure `gpt-4o`, `gpt-4o-mini`, and `whisper-1` models are available
+3. **Set up OpenAI** — Get an API key, ensure `gpt-4o` and `whisper-1` models are available
 4. **Set up Google Cloud** — Create project, enable Calendar API, create OAuth credentials
 5. **Deploy to Cloudflare** — `npm install && npx wrangler login && npm run deploy`
 6. **Set secrets** — Use `npx wrangler secret put` for each env var
@@ -309,7 +303,7 @@ See the [Hebrew guide above](#hebrew) for detailed step-by-step instructions.
 
 - **Natural language** — "Meeting tomorrow at 3pm", "Birthday party Friday at 5"
 - **Voice messages** — Send a voice note, it gets transcribed and parsed
-- **Image parsing** — Send a photo of an invitation/flyer, AI extracts the event details
+- **Image parsing** — Send a photo of an invitation/flyer, AI extracts the event details and attaches the image to the calendar event
 - **Relative time** — "in an hour", "next Monday" — all work
 - **Multi-language** — Hebrew, English, and more
 - **Delete from chat** — Each event has a delete button
