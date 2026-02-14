@@ -59,6 +59,45 @@ export async function parseEventText(env: Env, text: string): Promise<ParsedEven
   return JSON.parse(jsonMatch[0]);
 }
 
+export async function parseEventImage(env: Env, imageUrl: string, caption?: string): Promise<ParsedEvent> {
+  const { date, time, dayName } = getNowIsrael();
+
+  const imageRes = await fetch(imageUrl);
+  const imageBuffer = await imageRes.arrayBuffer();
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
+  const contentType = imageRes.headers.get('content-type') || 'image/jpeg';
+
+  const userContent: any[] = [
+    { type: 'image_url', image_url: { url: `data:${contentType};base64,${base64}` } },
+  ];
+  if (caption) {
+    userContent.push({ type: 'text', text: caption });
+  }
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.OPENAI_API_KEY}` },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT + `\n\nהיום: ${date} (יום ${dayName}), השעה עכשיו: ${time}\n\nהמשתמש שלח תמונה. חלץ ממנה את פרטי האירוע (שם, תאריך, שעה, מיקום). אם יש כיתוב נוסף, השתמש בו כהקשר.` },
+        { role: 'user', content: userContent },
+      ],
+      temperature: 0.1,
+      max_tokens: 500,
+    }),
+  });
+
+  const data: any = await res.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error('No AI response');
+
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Could not parse AI response');
+
+  return JSON.parse(jsonMatch[0]);
+}
+
 export async function transcribeVoice(env: Env, audioUrl: string): Promise<string> {
   const audioRes = await fetch(audioUrl);
   const audioBuffer = await audioRes.arrayBuffer();

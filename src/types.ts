@@ -24,7 +24,9 @@ export interface TelegramMessage {
   chat: { id: number; type: string };
   from?: { id: number; first_name: string };
   text?: string;
+  caption?: string;
   voice?: { file_id: string; duration: number };
+  photo?: Array<{ file_id: string; file_unique_id: string; width: number; height: number }>;
   entities?: Array<{ type: string; offset: number; length: number }>;
   date: number;
 }

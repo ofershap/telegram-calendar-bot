@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org/)
 [![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020.svg)](https://workers.cloudflare.com/)
 
-**בוט טלגרם שמכניס אירועים ליומן Google שלך מטקסט חופשי או הודעה קולית, באמצעות AI.**
+**בוט טלגרם שמכניס אירועים ליומן Google שלך מטקסט חופשי, הודעה קולית, או תמונה — באמצעות AI.**
 
 [English](#english) · [עברית](#hebrew)
 
@@ -22,7 +22,7 @@
 
 עכשיו זה קל — **שלח הודעה לבוט, והאירוע נכנס ליומן.**
 
-פשוט תעשה פורוורד של ההודעה, תכתוב בשפה חופשית, או תשלח הודעה קולית — והבוט ידאג להכל.
+פשוט תעשה פורוורד של ההודעה, תכתוב בשפה חופשית, תשלח הודעה קולית, או תשלח תמונה של הזמנה — והבוט ידאג להכל.
 
 <p align="center">
   <img src="assets/telegram-bot-demo.png" width="420" alt="הבוט יוצר אירוע מהודעת טקסט" />
@@ -47,6 +47,7 @@
 | `תזכיר לי בעוד שעה לצלצל לרופא` | אירוע בעוד שעה מעכשיו |
 | `Team sync Monday 10am` | עובד גם באנגלית |
 | 🎤 הודעה קולית | מתמלל ויוצר אירוע |
+| 📸 תמונה של הזמנה / פלאייר | חולץ פרטים מהתמונה ויוצר אירוע |
 
 כל אירוע מגיע עם **כפתור מחיקה** למקרה שטעית.
 
@@ -100,11 +101,15 @@
    - **APIs & Services → Credentials**
    - **Create Credentials → OAuth client ID**
    - סוג: **Web application**
-   - הוסף Redirect URI:
+   - הוסף Redirect URI זמני (נעדכן אחרי הדיפלוי):
+     ```
+     https://example.com/oauth/callback
+     ```
+   - שמור את ה-**Client ID** וה-**Client Secret**
+   - ⚠️ **חשוב:** אחרי שלב 3 (דיפלוי ל-Cloudflare), תחזור לכאן ותעדכן את ה-Redirect URI לכתובת האמיתית:
      ```
      https://telegram-calendar-bot.YOUR_SUBDOMAIN.workers.dev/oauth/callback
      ```
-   - שמור את ה-**Client ID** וה-**Client Secret**
 4. **הגדר OAuth consent screen:**
    - **APIs & Services → OAuth consent screen**
    - בחר **External**
@@ -165,6 +170,11 @@ echo "https://telegram-calendar-bot.YOUR_SUBDOMAIN.workers.dev" | npx wrangler s
 npm run deploy
 ```
 
+> 🔄 **אחרי הדיפלוי:** חזור ל-[Google Cloud Console](https://console.cloud.google.com/) → Credentials → ה-OAuth Client שלך, ועדכן את ה-**Redirect URI** לכתובת האמיתית שקיבלת מ-Cloudflare:
+> ```
+> https://telegram-calendar-bot.YOUR_SUBDOMAIN.workers.dev/oauth/callback
+> ```
+
 </details>
 
 ---
@@ -188,6 +198,7 @@ curl -X POST "https://api.telegram.org/bot<TOKEN>/setWebhook" \
 ```
 Telegram  →  Cloudflare Worker  →  OpenAI GPT-4o-mini  →  Google Calendar API
                                 →  OpenAI Whisper (תמלול קולי)
+                                →  GPT-4o-mini Vision (חילוץ מתמונות)
 ```
 
 | רכיב | תפקיד |
@@ -195,7 +206,7 @@ Telegram  →  Cloudflare Worker  →  OpenAI GPT-4o-mini  →  Google Calendar 
 | **Hono** | Web framework קליל |
 | **Cloudflare Workers** | Serverless, אפס cold starts |
 | **Cloudflare KV** | שמירת OAuth tokens |
-| **OpenAI GPT-4o-mini** | פענוח טקסט חופשי לאירוע |
+| **OpenAI GPT-4o-mini** | פענוח טקסט חופשי לאירוע + חילוץ מתמונות |
 | **OpenAI Whisper** | תמלול הודעות קוליות |
 | **Google Calendar API** | יצירה ומחיקה של אירועים |
 
@@ -254,9 +265,9 @@ npm run dev
 
 ## English
 
-A Telegram bot that creates Google Calendar events from natural language messages and voice notes, powered by AI. Runs on Cloudflare Workers.
+A Telegram bot that creates Google Calendar events from natural language messages, voice notes, and images — powered by AI. Runs on Cloudflare Workers.
 
-Send a message like **"Meeting with Dan tomorrow at 3pm"** or a voice note, and it instantly appears in your Google Calendar.
+Send a message like **"Meeting with Dan tomorrow at 3pm"**, a voice note, or a photo of an invitation — and it instantly appears in your Google Calendar.
 
 ### Quick Start
 
@@ -274,6 +285,7 @@ See the [Hebrew guide above](#hebrew) for detailed step-by-step instructions.
 
 - **Natural language** — "Meeting tomorrow at 3pm", "Birthday party Friday at 5"
 - **Voice messages** — Send a voice note, it gets transcribed and parsed
+- **Image parsing** — Send a photo of an invitation/flyer, AI extracts the event details
 - **Relative time** — "in an hour", "next Monday" — all work
 - **Multi-language** — Hebrew, English, and more
 - **Delete from chat** — Each event has a delete button

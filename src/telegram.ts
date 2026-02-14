@@ -44,7 +44,7 @@ export async function answerCallback(env: Env, callbackId: string, text?: string
   });
 }
 
-export async function getVoiceFileUrl(env: Env, fileId: string): Promise<string | null> {
+export async function getFileUrl(env: Env, fileId: string): Promise<string | null> {
   const res = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/getFile?file_id=${fileId}`);
   const data: any = await res.json();
   if (!data.ok || !data.result?.file_path) return null;
