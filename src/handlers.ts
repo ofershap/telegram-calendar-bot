@@ -101,6 +101,7 @@ async function handleAddEvent(chatId: number, text: string, env: Env): Promise<v
     let msg = `✅ <b>אירוע נוסף ליומן!</b>\n\n📌 <b>${escapeHtml(parsed.title)}</b>\n🗓 יום ${evDay}, ${formatDate(startTime)}\n🕐 ${parsed.start_time} - ${parsed.end_time}`;
     if (parsed.location) msg += `\n📍 ${escapeHtml(parsed.location)}`;
     if (parsed.description) msg += `\n📝 ${escapeHtml(parsed.description)}`;
+    if (event.htmlLink) msg += `\n\n🔗 <a href="${event.htmlLink}">פתח ביומן</a>`;
 
     await sendMessage(env, chatId, msg, [[{ text: '🗑 מחק אירוע', callback_data: `delete:${event.id}` }]]);
   } catch (err) {
@@ -160,6 +161,7 @@ async function handlePhoto(chatId: number, fileId: string, caption: string | und
     let msg = `✅ <b>אירוע נוסף ליומן!</b>\n\n📌 <b>${escapeHtml(parsed.title)}</b>\n🗓 יום ${evDay}, ${formatDate(startTime)}\n🕐 ${parsed.start_time} - ${parsed.end_time}`;
     if (parsed.location) msg += `\n📍 ${escapeHtml(parsed.location)}`;
     if (parsed.description) msg += `\n📝 ${escapeHtml(parsed.description)}`;
+    if (event.htmlLink) msg += `\n\n🔗 <a href="${event.htmlLink}">פתח ביומן</a>`;
 
     await sendMessage(env, chatId, msg, [[{ text: '🗑 מחק אירוע', callback_data: `delete:${event.id}` }]]);
   } catch (err) {
