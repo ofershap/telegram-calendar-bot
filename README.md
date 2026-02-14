@@ -25,9 +25,7 @@
 פשוט תעשה פורוורד של ההודעה, תכתוב בשפה חופשית, תשלח הודעה קולית, או תשלח תמונה של הזמנה — והבוט ידאג להכל.
 
 <p align="center">
-  <img src="assets/telegram-bot-demo.png" width="420" alt="הבוט יוצר אירוע מהודעת טקסט" />
-  &nbsp;&nbsp;&nbsp;
-  <img src="assets/google-calendar-demo.png" width="240" alt="האירוע מופיע ביומן Google" />
+  <img src="assets/demo.gif" width="640" alt="שליחת הודעה בטלגרם → AI מפענח → אירוע ביומן Google" />
 </p>
 
 ### איך זה עובד?
