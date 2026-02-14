@@ -91,7 +91,7 @@ export async function parseEventImage(env: Env, imageUrl: string, caption?: stri
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.OPENAI_API_KEY}` },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT + `\n\nהיום: ${date} (יום ${dayName}), השעה עכשיו: ${time}\n\nהמשתמש שלח תמונה של אירוע (הזמנה, פלאייר, צילום מסך וכו').\n- חלץ תאריך, שעה ומיקום מהתמונה\n- אם המשתמש צירף כיתוב (caption) — השתמש בו כשם האירוע (title). הכיתוב הוא התיאור שלו לאירוע מנקודת המבט שלו.\n- אם אין כיתוב, בחר שם אירוע מתאים מתוך התמונה.` },
         { role: 'user', content: userContent },
