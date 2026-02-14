@@ -59,12 +59,22 @@ export async function parseEventText(env: Env, text: string): Promise<ParsedEven
   return JSON.parse(jsonMatch[0]);
 }
 
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
 export async function parseEventImage(env: Env, imageUrl: string, caption?: string): Promise<ParsedEvent> {
   const { date, time, dayName } = getNowIsrael();
 
   const imageRes = await fetch(imageUrl);
+  if (!imageRes.ok) throw new Error(`Failed to download image: ${imageRes.status}`);
   const imageBuffer = await imageRes.arrayBuffer();
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
+  const base64 = arrayBufferToBase64(imageBuffer);
   const contentType = imageRes.headers.get('content-type') || 'image/jpeg';
 
   const userContent: any[] = [
@@ -90,7 +100,7 @@ export async function parseEventImage(env: Env, imageUrl: string, caption?: stri
 
   const data: any = await res.json();
   const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error('No AI response');
+  if (!content) throw new Error(data.error?.message || `No AI response: ${JSON.stringify(data)}`);
 
   const jsonMatch = content.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('Could not parse AI response');
